@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -6,10 +5,11 @@ import {
 } from "@/components/ui/resizable";
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "sonner";
-import DatabaseView from "./components/DatabaseView";
 import Navbar from "./components/Navbar";
 import QueryResult from "./components/QueryResult";
 import SQLEditor from "./components/SQLEditor";
+import DatabaseView from "./components/views/DatabaseView";
+import QueryViews from "./components/views/QueryViews";
 import database from "./db/initDB";
 
 const initialSchema = `CREATE TABLE users (
@@ -65,19 +65,13 @@ function findErrorLocation(
 
 function App() {
   const [schema, setSchema] = useState(initialSchema);
-  const [sql, setSql] = useState("SELECT * FROM users;");
-  const [selectedSql, setSelectedSql] = useState<string>("");
   const [result, setResult] = useState<Record<string, unknown>[]>([]);
+
   const [dbError, setDbError] = useState<string | null>(null);
   const [dbErrorLocation, setDbErrorLocation] = useState<ErrorLocation | null>(
     null
   );
   const [refreshKey, setRefreshKey] = useState(0);
-  const [queryLoading, setQueryLoading] = useState(false);
-  const [queryRowCount, setQueryRowCount] = useState<number | null>(null);
-  const [queryExecutionTime, setQueryExecutionTime] = useState<number | null>(
-    null
-  );
 
   useEffect(() => {
     const handler = setTimeout(async () => {
@@ -103,30 +97,6 @@ function App() {
       clearTimeout(handler);
     };
   }, [schema]);
-
-  const runQuery = async () => {
-    setQueryLoading(true);
-    setQueryRowCount(null);
-    setQueryExecutionTime(null);
-    const startTime = performance.now();
-    const queryToExecute = selectedSql || sql;
-
-    try {
-      const { rows } = await database.query(queryToExecute);
-      const endTime = performance.now();
-      setResult(rows);
-      setQueryRowCount(rows.length);
-      setQueryExecutionTime(endTime - startTime);
-      toast.success("Query executed successfully!");
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        toast.error(`Query failed: ${e.message}`);
-        setResult([]);
-      }
-    } finally {
-      setQueryLoading(false);
-    }
-  };
 
   return (
     <div className="h-screen flex flex-col">
@@ -159,43 +129,7 @@ function App() {
             </ResizablePanel>
             <ResizableHandle />
             <ResizablePanel defaultSize={50}>
-              <div className="p-4 h-full flex flex-col">
-                <h2 className="text-lg font-semibold mb-2">
-                  3. Write SQL Query
-                </h2>
-                <div className="flex-1">
-                  <SQLEditor
-                    value={sql}
-                    onChange={setSql}
-                    onSelectionChange={setSelectedSql}
-                  />
-                </div>
-                <div className="flex items-center mt-2">
-                  <Button onClick={runQuery} loading={queryLoading}>
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 3l14 9-14 9V3z"
-                      />
-                    </svg>
-                    {selectedSql ? "Execute Selection" : "Run"}
-                  </Button>
-                  {queryRowCount !== null && queryExecutionTime !== null && (
-                    <span className="ml-4 text-sm text-gray-600">
-                      {queryRowCount} rows returned. Executed in{" "}
-                      {queryExecutionTime.toFixed(2)} ms.
-                    </span>
-                  )}
-                </div>
-              </div>
+              <QueryViews setResult={setResult} />
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>

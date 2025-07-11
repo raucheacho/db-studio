@@ -1,10 +1,10 @@
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useEffect, useState } from "react";
-import database from "../db/initDB";
-import QueryResult from "./QueryResult";
+import database from "../../db/initDB";
+import QueryResult from "../QueryResult";
 
-import TableList from "./TableList";
-import { Tabs, TabsContent } from "./ui/tabs";
+import TableList from "../TableList";
+import { Tabs, TabsContent } from "../ui/tabs";
 
 interface ColumnInfo {
   cid: number; // Not directly available from information_schema, will be 0 or a placeholder

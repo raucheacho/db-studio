@@ -1,6 +1,6 @@
 import Editor from "@monaco-editor/react";
-import { useRef, useEffect } from "react";
-import * as monaco from 'monaco-editor';
+import * as monaco from "monaco-editor";
+import { useEffect, useRef } from "react";
 
 interface ErrorLocation {
   lineNumber: number;
@@ -25,7 +25,10 @@ export default function SQLEditor({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof monaco | null>(null);
 
-  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => {
+  const handleEditorDidMount = (
+    editor: monaco.editor.IStandaloneCodeEditor,
+    monacoInstance: typeof monaco
+  ) => {
     editorRef.current = editor;
     monacoRef.current = monacoInstance;
 
@@ -33,10 +36,11 @@ export default function SQLEditor({
       if (onSelectionChange) {
         const selection = editor.getSelection();
         if (selection && !selection.isEmpty()) {
-          const selectedText = editor.getModel()?.getValueInRange(selection) || '';
+          const selectedText =
+            editor.getModel()?.getValueInRange(selection) || "";
           onSelectionChange(selectedText);
         } else {
-          onSelectionChange('');
+          onSelectionChange("");
         }
       }
     });
@@ -50,7 +54,9 @@ export default function SQLEditor({
           const startLine = errorLocation?.lineNumber || 1;
           const startColumn = errorLocation?.columnNumber || 1;
           const endLine = errorLocation?.lineNumber || 1;
-          const endColumn = errorLocation?.columnNumber ? model.getLineMaxColumn(errorLocation.lineNumber) : model.getLineMaxColumn(1);
+          const endColumn = errorLocation?.columnNumber
+            ? model.getLineMaxColumn(errorLocation.lineNumber)
+            : model.getLineMaxColumn(1);
 
           monacoRef.current.editor.setModelMarkers(model, "owner", [
             {
@@ -71,7 +77,7 @@ export default function SQLEditor({
 
   return (
     <Editor
-      height="100%"
+      height="95%"
       defaultLanguage="sql"
       value={value}
       onChange={(val) => onChange(val || "")}
